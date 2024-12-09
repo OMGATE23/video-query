@@ -19,17 +19,13 @@ async def process_video(file):
     video_path = Path(f"temp/{video_id}.mp4")
     screenshots_dir = Path(f"temp/screenshots/{video_id}")
 
-    print(video_id)
-    # Save uploaded file
     os.makedirs(video_path.parent, exist_ok=True)
     with open(video_path, "wb") as f:
       f.write(file.file.read())
 
-    # Extract screenshots
     os.makedirs(screenshots_dir, exist_ok=True)
     extract_screenshots(video_path, screenshots_dir)
 
-    # Initialize models
     client = Client(
       host='http://localhost:11434'
     )
@@ -41,12 +37,10 @@ async def process_video(file):
       response = requests.get(screenshot_url)
 
       if not response.ok :
-        print("NOT OK")
         continue
 
 
       encoded_image = base64.b64encode(response.content).decode('utf-8')
-      # Process with LLava and MXBai
       caption_response = client.chat(model='llava', messages=[
         {
           "role":"user",
@@ -58,13 +52,9 @@ async def process_video(file):
       embed_response = client.embed(model='mxbai-embed-large', input=caption)
       embeddings= embed_response['embeddings'][0]
 
-      print(caption)
-      print(embeddings)
-      # Extract timestamp from filename
       frame_match = screenshot.name.split("_")[1].split(".")[0]
       timestamp = int(frame_match)
 
-      # Save metadata to Supabase
       supabase.table("videoembed").insert({
         "video_id": video_id,
         "path": screenshot_url,
@@ -73,7 +63,6 @@ async def process_video(file):
         "description": caption,
       }).execute()
 
-    # Cleanup
     os.remove(video_path)
     shutil.rmtree(screenshots_dir)
 

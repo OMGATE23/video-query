@@ -28,5 +28,4 @@ def upload_to_supabase(file_path: Path, destination_path: str):
       error_message = getattr(response, "error", "Unknown error")
       raise RuntimeError(f"Supabase upload failed: {error_message}")
     signed_url = supabase.storage.from_("screenshots").create_signed_url(destination_path, 60 * 60 * 12)
-    print(signed_url)
     return signed_url["signedURL"]
