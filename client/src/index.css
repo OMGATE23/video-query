@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+input[type="file"]::file-selector-button{ /* the button to select file */
+  background-color: #ffffff;
+  margin: 0;
+  border: 0;
+  outline: 1px solid rgba(0,0,0,0.2);
+  margin-right: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1000rem;
+  transition: all 100ms;
+  cursor: pointer;
+}
+input[type="file"]::file-selector-button:hover{
+  background-color: rgba(0,0,0,0.1);
+}
+
+input[type="file"]::file-selector-button:active{
+  background-color: #ffffff;
+}
+
+input[type="file" i]{ /* the name of the selected file */
+  width: 100%;
+}
