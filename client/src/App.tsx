@@ -8,10 +8,11 @@ import { TimeStamp } from './types';
 const App: React.FC = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
-  // const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [query, setQuery] = useState<string>('');
   const videoRef = useRef<HTMLVideoElement | null>(null)
-  const [timestamps, setTimeStamps] = useState<TimeStamp[]>([]); 
+  const [timestamps, setTimeStamps] = useState<TimeStamp[]>([]);
+  const [uploaded, setUploaded] = useState(false); 
   const handleSubmitQuery = async () => {
     if (!query) return;
     try {
@@ -50,30 +51,30 @@ const App: React.FC = () => {
   }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // setLoading(true);
+    setLoading(true);
     const file = event.target.files?.[0];
     if (file) {
       setVideoFile(file);
       setVideoSrc(URL.createObjectURL(file));
     }
-    // setLoading(false)
+    toast.success('Video uploaded!')
+    setLoading(false)
   };
 
   const handleUpload = async () => {
     if (!videoFile) {
       toast.error('Please select a video file first');
-      // setLoading(false)
       return;
     }
 
     if (!videoFile.type.startsWith('video/')) {
       toast.error('Selected file is not a video');
-      // setLoading(false)
       return;
     }
 
     try {
       toast.loading('Uploading...')
+      setUploaded(false);
       const formData = new FormData();
       formData.append('file', videoFile);
 
@@ -83,16 +84,17 @@ const App: React.FC = () => {
       });
 
       if (!response.ok) {
-        // setLoading(false)
+        setLoading(false)
         throw new Error('Failed to upload the video.');
       }
 
       const data = await response.json();
       localStorage.setItem('videoId', data.videoId);
-      // setLoading(false)
+      setLoading(false)
+      setUploaded(true);
       toast.success('Video uploaded successfully.')
     } catch (error) {
-      // setLoading(false)
+      setLoading(false)
       if (error instanceof Error) {
         toast.error(error.message)
       } else {
@@ -148,14 +150,15 @@ const App: React.FC = () => {
         <div>
           <button
             onClick={handleUpload}
-            className='flex items-center gap-2 shadow py-2 px-4 rounded-full bg-neutral-900 text-white'
+            disabled={loading}
+            className='flex disabled:bg-neutral-700 items-center gap-2 shadow py-2 px-4 rounded-full bg-neutral-900 text-white'
           >
             <UploadIcon size={16} />
-            Upload Video
+            Process Video
           </button>
         </div>
 
-        { videoSrc && (
+        { videoSrc && uploaded &&  (
           <div className='flex justify-start gap-4 items-center mt-4'>
             <input
               placeholder='Enter query'
